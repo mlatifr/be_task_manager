@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { Task } = require('./models'); 
+const { Task } = require('./models');
 const app = express();
 const PORT = 3000;
 
@@ -26,12 +26,12 @@ let tasks = [
 // 1. GET ALL TASKS (Read)
 // Sekarang Task.findAll() akan berfungsi
 app.get('/tasks', async (req, res) => {
-  try {
-    const tasks = await Task.findAll();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+    try {
+        const tasks = await Task.findAll();
+        res.json(tasks);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 // 2. POST NEW TASK (Create ke MySQL)
@@ -46,7 +46,7 @@ app.post('/tasks', async (req, res) => { // Tambahkan 'async'
         });
 
         // Response ini otomatis akan mengandung ID dari MySQL
-        res.status(201).json(newTask); 
+        res.status(201).json(newTask);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -66,10 +66,22 @@ app.put('/tasks/:id', (req, res) => {
 });
 
 // 4. DELETE TASK (Delete)
-app.delete('/tasks/:id', (req, res) => {
-    const { id } = req.params;
-    tasks = tasks.filter(t => t.id !== id);
-    res.json({ message: "Berhasil dihapus" });
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await Task.destroy({
+            where: { id: id }
+        });
+
+        if (result === 1) {
+            res.json({ message: "Berhasil dihapus dari Database" });
+        } else {
+            res.status(404).json({ message: "Gagal: ID tidak ditemukan di database" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 // Jalankan Server
