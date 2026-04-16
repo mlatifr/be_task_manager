@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const { Task } = require('./models'); 
 const app = express();
 const PORT = 3000;
 
@@ -24,8 +24,14 @@ let tasks = [
 // --- ROUTES (API Endpoints) ---
 
 // 1. GET ALL TASKS (Read)
-app.get('/tasks', (req, res) => {
+// Sekarang Task.findAll() akan berfungsi
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await Task.findAll();
     res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // 2. POST NEW TASK (Create)
