@@ -34,17 +34,22 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
-// 2. POST NEW TASK (Create)
-app.post('/tasks', (req, res) => {
-    const newTask = {
-        id: Date.now().toString(), // Generate ID unik sederhana
-        title: req.body.title,
-        description: req.body.description,
-        status: req.body.status,
-        dueDate: req.body.dueDate
-    };
-    tasks.push(newTask);
-    res.status(201).json(newTask); // Kirim balik data yang baru dibuat
+// 2. POST NEW TASK (Create ke MySQL)
+app.post('/tasks', async (req, res) => { // Tambahkan 'async'
+    try {
+        // Gunakan Task.create agar tersimpan ke MySQL
+        const newTask = await Task.create({
+            title: req.body.title,
+            description: req.body.description,
+            status: req.body.status,
+            dueDate: req.body.dueDate
+        });
+
+        // Response ini otomatis akan mengandung ID dari MySQL
+        res.status(201).json(newTask); 
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 // 3. PUT UPDATE TASK (Update)
