@@ -53,17 +53,36 @@ app.post('/tasks', async (req, res) => { // Tambahkan 'async'
 });
 
 // 3. PUT UPDATE TASK (Update)
-app.put('/tasks/:id', (req, res) => {
-    const { id } = req.params;
-    const index = tasks.findIndex(t => t.id === id);
+app.put('/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
 
-    if (index !== -1) {
-        tasks[index] = { ...tasks[index], ...req.body };
-        res.json(tasks[index]);
-    } else {
-        res.status(404).json({ message: "Task tidak ditemukan" });
+
+        const task = await Task.findByPk(id);
+
+
+        if (task) {
+
+            await task.update({
+                title: req.body.title,
+                description: req.body.description,
+                status: req.body.status,
+                dueDate: req.body.dueDate
+            });
+
+
+            return res.json(task);
+        }
+
+
+        return res.status(404).json({ message: "Task tidak ditemukan di MySQL" });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
     }
 });
+
 
 // 4. DELETE TASK (Delete)
 app.delete('/tasks/:id', async (req, res) => {
